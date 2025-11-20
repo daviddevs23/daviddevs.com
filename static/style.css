@@ -1,3 +1,10 @@
-h1 {
-    border: solid red 10px;
+body {
+    margin: 0px;
+    padding: 0px;
+}
+.mainDisplay {
+    border: solid red 1px;
+    width: 100vw;
+    height: 100vh;
+    margin: 0px;
 }

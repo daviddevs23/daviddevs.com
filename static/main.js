@@ -1,36 +1,39 @@
-// web component
-class HelloWorld extends HTMLElement {
+import './components/child-control.js';
+import './components/child-display.js';
+
+class AppMain extends HTMLElement {
     constructor() {
         super();
-        this.name = 'World';
-    }
-  
-    static get observedAttributes() {
-          return ['name'];
+        this.attachShadow({ mode: "open" });
+
+        this.state = { count: 0 };
     }
 
     connectedCallback() {
-      const shadow = this.attachShadow({ mode: 'closed' });
-      shadow.innerHTML = `
-        <style>
-          p {
-            text-align: center;
-            font-weight: normal;
-            padding: 1em;
-            margin: 0 0 2em 0;
-            background-color: #eee;
-            border: 1px solid #666;
-          }
-        </style>
-        <p>Hello ${ this.name }!</p>`;
+        this.shadowRoot.innerHTML = `
+            <child-display></child-display>
+            <child-control></child-control>
+        `;
 
+        // Listen to events from children
+        this.shadowRoot.addEventListener("increment-requested", (e) => {
+            this.state.count += e.detail.amount;
+            this.updateChildren();
+        });
     }
-    // attribute change
-    attributeChangedCallback(property, oldValue, newValue) {
-        if (oldValue === newValue) return;
-        this[ property ] = newValue;
+
+    updateChildren() {
+        const child = this.shadowRoot.querySelector("child-display");
+        child.dispatchEvent(new CustomEvent("parent-updated", {
+            bubbles: false,   // doesn't matter for downward events
+            composed: false,
+            detail: { count: this.state.count }
+        }));
+    }
+
+    getAppState() {
+        return this.state;
     }
 }
 
-// register component
-customElements.define( 'hello-world', HelloWorld );
+customElements.define("app-main", AppMain);
